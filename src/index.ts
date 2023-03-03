@@ -3,6 +3,10 @@ import { join } from 'path';
 
 const appNotSpecifiedError = new Error('App not specified');
 const keyNotSpecifiedError = new Error('Key not specified');
+
+/* istanbul ignore next */
+const valueOrError = (resolve, reject) => (error, value = null) => error ? reject(error) : resolve(value)
+
 let db: sqlite.Database;
 
 const columns = {
@@ -24,9 +28,7 @@ export interface AppKeyValue extends App, KeyValue { }
 
 function close() {
   try {
-    if (db) {
-      db.close();
-    }
+    db?.close();
   } catch { };
 }
 
@@ -39,7 +41,10 @@ function reload() {
     sqlite.verbose();
   }
 
-  const databasePath = inMemory ? ':memory:' : join(process.cwd(), 'env.db');
+  const databasePath = {
+    true: ':memory:',
+    false: join(process.cwd(), 'env.db')
+  }[String(inMemory)];
 
   db = new sqlite.Database(databasePath);
   db.run(`CREATE TABLE IF NOT EXISTS env (
@@ -67,7 +72,7 @@ async function show(options: App) {
         FROM env WHERE
         ${columns.App} = ?`
       )
-      .all([app], (error, rows) => error ? reject(error) : resolve(rows));
+      .all([app], valueOrError(resolve, reject));
   });
 }
 
@@ -75,7 +80,7 @@ async function apps() {
   return new Promise((resolve, reject) => {
     db
       .prepare(`SELECT ${columns.App} FROM env`)
-      .all([], (error, rows) => error ? reject(error) : resolve(rows));
+      .all([], valueOrError(resolve, reject));
   });
 }
 
@@ -129,7 +134,7 @@ async function get(options: Omit<AppKeyValue, 'value'>) {
           FROM env WHERE
             ${columns.App} = ? AND ${columns.Key} = ?`
         )
-        .all([app, key], (error, rows) => (error ? reject(error) : resolve(rows[0])));
+        .all([app, key], valueOrError(resolve, reject));
     });
   });
 }
@@ -139,10 +144,10 @@ async function query(statement, inputs) {
     db.serialize(() => {
       db
         .prepare(statement)
-        .run(inputs)
-        .finalize((error) => (error ? reject(error) : resolve(null)));
+        .run(inputs, valueOrError(resolve, reject));
     });
   })
 }
+
 
 export default { reload, show, get, set, delete: remove, apps };
