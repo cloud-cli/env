@@ -1,14 +1,7 @@
 {
+  "extends": "@cloud-cli/typescript-config",
   "compilerOptions": {
-    "moduleResolution": "node",
-    "module": "esnext",
-    "target": "es2020",
-    "lib": ["ESNext"],
-    "esModuleInterop": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "outDir": "./dist",
-    "declaration": true
   },
   "include": ["./src/**/*.ts"]
 }

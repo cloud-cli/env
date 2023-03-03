@@ -71,6 +71,14 @@ async function show(options: App) {
   });
 }
 
+async function apps() {
+  return new Promise((resolve, reject) => {
+    db
+      .prepare(`SELECT ${columns.App} FROM env`)
+      .all([], (error, rows) => error ? reject(error) : resolve(rows));
+  });
+}
+
 async function set(options: AppKeyValue) {
   const { app, key, value } = options;
 
@@ -137,4 +145,4 @@ async function query(statement, inputs) {
   })
 }
 
-export default { reload, show, get, set, delete: remove };
+export default { reload, show, get, set, delete: remove, apps };

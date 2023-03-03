@@ -21,6 +21,7 @@ describe('env', () => {
     await expect(env.get({ app: 'test', key: 'key' })).resolves.toEqual(envVariable);
 
     await expect(env.show(app)).resolves.toEqual([envVariable]);
+    await expect(env.apps()).resolves.toEqual([{ app: 'test' }]);
 
     await expect(env.delete(envVariable)).resolves.toBeNull();
     await expect(env.show(app)).resolves.toEqual([]);
