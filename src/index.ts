@@ -150,4 +150,4 @@ async function query(statement, inputs) {
 }
 
 
-export default { reload, show, get, set, delete: remove, apps };
+export default { get, set, show, remove, apps, reload };
