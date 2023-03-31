@@ -1,19 +1,15 @@
-import sqlite from 'sqlite3';
-import { join } from 'path';
+import { Model, NotNull, Property, Query, Resource, Unique } from '@cloud-cli/store';
+import { init } from '@cloud-cli/cli';
 
 const appNotSpecifiedError = new Error('App not specified');
 const keyNotSpecifiedError = new Error('Key not specified');
 
-/* istanbul ignore next */
-const valueOrError = (resolve, reject) => (error, value = null) => error ? reject(error) : resolve(value)
-
-let db: sqlite.Database;
-
-const columns = {
-  App: 'app',
-  Key: 'key',
-  Value: 'value',
-};
+@Model('env')
+class EnvEntry extends Resource {
+  @Unique() @NotNull() @Property(String) app: string;
+  @Unique() @NotNull() @Property(String) key: string;
+  @Property(String) value: string;
+}
 
 export interface App {
   app: string;
@@ -26,128 +22,64 @@ export interface KeyValue {
 
 export interface AppKeyValue extends App, KeyValue { }
 
-function close() {
-  try {
-    db?.close();
-  } catch { };
-}
-
-function reload() {
-  close();
-
-  const inMemory = !!process.env.IN_MEMORY_DB;
-
-  if (inMemory) {
-    sqlite.verbose();
-  }
-
-  const databasePath = {
-    true: ':memory:',
-    false: join(process.cwd(), 'env.db')
-  }[String(inMemory)];
-
-  db = new sqlite.Database(databasePath);
-  db.run(`CREATE TABLE IF NOT EXISTS env (
-      ${columns.App} TEXT,
-      ${columns.Key} TEXT,
-      ${columns.Value} TEXT,
-      UNIQUE (${columns.App}, ${columns.Key})
-  )`);
+async function reload() {
+  await Resource.create(EnvEntry);
 }
 
 async function show(options: App) {
-  return new Promise((resolve, reject) => {
-    const { app } = options;
+  const { app } = options;
 
-    if (!app) {
-      return reject(appNotSpecifiedError);
-    }
+  if (!app) {
+    throw appNotSpecifiedError;
+  }
 
-    db
-      .prepare(`
-        SELECT
-          ${columns.App},
-          ${columns.Key},
-          ${columns.Value}
-        FROM env WHERE
-        ${columns.App} = ?`
-      )
-      .all([app], valueOrError(resolve, reject));
-  });
+  return Resource.find(EnvEntry, new Query<EnvEntry>().where('app').is(app));
 }
 
 async function apps() {
-  return new Promise((resolve, reject) => {
-    db
-      .prepare(`SELECT ${columns.App} FROM env`)
-      .all([], valueOrError(resolve, reject));
-  });
+  const rows = await Resource.find(EnvEntry, new Query<EnvEntry>());
+  return rows.map(entry => entry.app);
 }
 
 async function set(options: AppKeyValue) {
   const { app, key, value } = options;
 
   if (!app) {
-    return Promise.reject(appNotSpecifiedError);
+    throw appNotSpecifiedError;
   }
 
   if (!key) {
-    return Promise.reject(keyNotSpecifiedError);
+    throw keyNotSpecifiedError;
   }
 
-  return query('REPLACE INTO env VALUES (?, ?, ?)', [app, key, value]);
+  const entry = new EnvEntry({ app, key, value });
+  await entry.save();
+
+  return entry;
 }
 
 async function remove(options: AppKeyValue) {
   const { app, key } = options;
+  const found = await get({ app, key })
 
-  if (!app) {
-    return Promise.reject(appNotSpecifiedError);
+  if ((found).length) {
+    return void await found[0].remove();
   }
-
-  if (!key) {
-    return Promise.reject(keyNotSpecifiedError);
-  }
-
-  return query(`DELETE FROM env WHERE ${columns.App} = ? AND ${columns.Key} = ?`, [app, key])
 }
 
 async function get(options: Omit<AppKeyValue, 'value'>) {
-  return new Promise((resolve, reject) => {
-    const { app, key } = options;
+  const { app, key } = options;
 
-    if (!app) {
-      return reject(appNotSpecifiedError);
-    }
+  if (!app) {
+    throw appNotSpecifiedError;
+  }
 
-    if (!key) {
-      return reject(keyNotSpecifiedError);
-    }
+  if (!key) {
+    throw keyNotSpecifiedError;
+  }
 
-    db.serialize(() => {
-      db
-        .prepare(`
-          SELECT
-            ${columns.App},
-            ${columns.Key},
-            ${columns.Value}
-          FROM env WHERE
-            ${columns.App} = ? AND ${columns.Key} = ?`
-        )
-        .all([app, key], valueOrError(resolve, reject));
-    });
-  });
-}
-
-async function query(statement, inputs) {
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db
-        .prepare(statement)
-        .run(inputs, valueOrError(resolve, reject));
-    });
-  })
+  return Resource.find(EnvEntry, new Query<EnvEntry>().where('app').is(app).where('key').is(key));
 }
 
 
-export default { get, set, show, remove, apps, reload };
+export default { get, set, show, remove, apps, reload, [init]: reload };

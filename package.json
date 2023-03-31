@@ -28,6 +28,7 @@
     "access": "public"
   },
   "dependencies": {
-    "sqlite3": "^5.1.4"
+    "@cloud-cli/cli": "^1.4.4",
+    "@cloud-cli/store": "^1.5.1"
   }
 }
