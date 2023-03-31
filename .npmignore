@@ -1,6 +1,6 @@
+.github/
 coverage/
-node_modules/
-dist/
+src/
 .prettierrc
-babel*
 jest*
+tsconfig.json
