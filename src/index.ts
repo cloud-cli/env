@@ -38,7 +38,7 @@ async function show(options: App) {
 
 async function apps() {
   const rows = await Resource.find(EnvEntry, new Query<EnvEntry>());
-  return rows.map(entry => entry.app);
+  return Array.from(new Set(rows.map(entry => entry.app)));
 }
 
 async function set(options: AppKeyValue) {
