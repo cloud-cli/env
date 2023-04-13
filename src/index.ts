@@ -1,4 +1,4 @@
-import { Model, NotNull, Property, Query, Resource, Unique } from '@cloud-cli/store';
+import { Model, NotNull, Property, Query, Resource, SQLiteDriver, Unique } from '@cloud-cli/store';
 import { init } from '@cloud-cli/cli';
 
 const appNotSpecifiedError = new Error('App not specified');
@@ -23,6 +23,7 @@ export interface KeyValue {
 export interface AppKeyValue extends App, KeyValue { }
 
 async function reload() {
+  Resource.use(new SQLiteDriver());
   await Resource.create(EnvEntry);
 }
 
