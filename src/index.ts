@@ -13,6 +13,7 @@ class EnvEntry extends Resource {
 
 export interface App {
   app: string;
+  name?: string;
 }
 
 export interface KeyValue {
@@ -28,7 +29,7 @@ async function reload() {
 }
 
 async function show(options: App) {
-  const { app } = options;
+  const app = options.app || options.name;
 
   if (!app) {
     throw appNotSpecifiedError;
@@ -43,7 +44,8 @@ async function apps() {
 }
 
 async function set(options: AppKeyValue) {
-  const { app, key, value } = options;
+  const app = options.app || options.name;
+  const { key, value } = options;
 
   if (!app) {
     throw appNotSpecifiedError;
@@ -69,6 +71,7 @@ async function remove(options: AppKeyValue) {
 }
 
 async function get(options: Omit<AppKeyValue, 'value'>) {
+  const app = options.app || options.name;
   const { app, key } = options;
 
   if (!app) {
