@@ -46,5 +46,6 @@ describe('env', () => {
     await expect(env.remove({ app: '', name: 'test', key: '' })).rejects.toEqual(new Error('Key not specified'));
     await expect(env.remove(envVariable)).resolves.toBeUndefined();
     await expect(env.show(app)).resolves.toEqual([]);
+    await expect(env.list({})).resolves.toEqual([]);
   });
 });

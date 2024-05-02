@@ -38,6 +38,10 @@ async function show(options: App) {
   return Resource.find(EnvEntry, new Query<EnvEntry>().where('app').is(app));
 }
 
+async function list() {
+  return Resource.find(EnvEntry, new Query<EnvEntry>());
+}
+
 async function apps() {
   const rows = await Resource.find(EnvEntry, new Query<EnvEntry>());
   return Array.from(new Set(rows.map(entry => entry.app)));
@@ -87,4 +91,4 @@ async function get(options: Omit<AppKeyValue, 'value'>) {
 }
 
 
-export default { get, set, show, remove, apps, reload, [init]: reload };
+export default { get, set, show, remove, apps, reload, list, [init]: reload };
