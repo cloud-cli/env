@@ -11,9 +11,7 @@
     "tdd": "jest --watchAll",
     "build": "rm -rf ./dist/* && tsc --project ./tsconfig.json"
   },
-  "keywords": [
-    "cloudy"
-  ],
+  "keywords": ["cloudy"],
   "license": "MIT",
   "devDependencies": {
     "@cloud-cli/jest-config": "^1.0.0",
@@ -28,7 +26,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@cloud-cli/cli": "^1.4.4",
-    "@cloud-cli/store": "^1.5.1"
+    "@cloud-cli/cli": "^1.4.4"
   }
 }
