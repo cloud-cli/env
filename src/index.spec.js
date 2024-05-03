@@ -1,4 +1,4 @@
-import env, { EnvEntry } from './index';
+import env from './index';
 
 const app = { app: 'test' };
 const envVariable = { app: 'test', key: 'key', value: 'ok' };
