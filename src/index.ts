@@ -1,4 +1,4 @@
-import { init, getStorage } from "@cloud-cli/cli";
+import { getStorage } from "@cloud-cli/cli";
 
 const appNotSpecifiedError = new Error("App not specified");
 const keyNotSpecifiedError = new Error("Key not specified");
