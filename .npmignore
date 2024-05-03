@@ -1,6 +1,7 @@
 .github/
 coverage/
 src/
+data/
 .prettierrc
 jest*
 tsconfig.json

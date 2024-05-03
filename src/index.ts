@@ -1,14 +1,14 @@
-import { Model, NotNull, Property, Query, Resource, SQLiteDriver, Unique } from '@cloud-cli/store';
-import { init } from '@cloud-cli/cli';
+import { init, getStorage } from "@cloud-cli/cli";
 
-const appNotSpecifiedError = new Error('App not specified');
-const keyNotSpecifiedError = new Error('Key not specified');
+const appNotSpecifiedError = new Error("App not specified");
+const keyNotSpecifiedError = new Error("Key not specified");
 
-@Model('env')
-export class EnvEntry extends Resource {
-  @Unique() @NotNull() @Property(String) app: string;
-  @Unique() @NotNull() @Property(String) key: string;
-  @Property(String) value: string;
+const { get, set, remove, getAll } = getStorage<EnvEntry>("env");
+
+export class EnvEntry {
+  app: string;
+  key: string;
+  value: string;
 }
 
 export interface App {
@@ -16,17 +16,17 @@ export interface App {
   name?: string;
 }
 
+export interface ListFilters {
+  app?: string;
+  key?: string;
+}
+
 export interface KeyValue {
   key: string;
   value?: string;
 }
 
-export interface AppKeyValue extends App, KeyValue { }
-
-async function reload() {
-  Resource.use(new SQLiteDriver());
-  await Resource.create(EnvEntry);
-}
+export interface AppKeyValue extends App, KeyValue {}
 
 async function show(options: App) {
   const app = options.app || options.name;
@@ -35,19 +35,30 @@ async function show(options: App) {
     throw appNotSpecifiedError;
   }
 
-  return Resource.find(EnvEntry, new Query<EnvEntry>().where('app').is(app));
+  return list({ app });
 }
 
-async function list() {
-  return Resource.find(EnvEntry, new Query<EnvEntry>());
+async function list(filters: ListFilters) {
+  let all = await getAll();
+
+  if (filters.app) {
+    all = all.filter((e) => e.app === filters.app);
+  }
+
+  if (filters.key) {
+    all = all.filter((e) => e.key === filters.key);
+  }
+
+  return all;
 }
 
 async function apps() {
-  const rows = await Resource.find(EnvEntry, new Query<EnvEntry>());
-  return Array.from(new Set(rows.map(entry => entry.app)));
+  const rows = await getAll();
+  const apps = rows.map((entry) => entry.app);
+  return [...new Set(apps)];
 }
 
-async function set(options: AppKeyValue) {
+async function setVar(options: AppKeyValue) {
   const app = options.app || options.name;
   const { key, value } = options;
 
@@ -59,23 +70,26 @@ async function set(options: AppKeyValue) {
     throw keyNotSpecifiedError;
   }
 
-  const entry = new EnvEntry({ app, key, value });
-  await entry.save();
+  const entry = { app, key, value };
+  await set(app + key, entry);
 
   return entry;
 }
 
-async function remove(options: AppKeyValue) {
+async function removeVar(options: AppKeyValue) {
   const app = options.app || options.name;
   const { key } = options;
-  const found = await get({ app, key })
+  const found = await getVar({ app, key });
 
-  if ((found).length) {
-    return void await found[0].remove();
+  if (found) {
+    remove(app + key);
+    return true;
   }
+
+  return false;
 }
 
-async function get(options: Omit<AppKeyValue, 'value'>) {
+async function getVar(options: Omit<AppKeyValue, "value">) {
   const app = options.app || options.name;
   const { key } = options;
 
@@ -87,8 +101,14 @@ async function get(options: Omit<AppKeyValue, 'value'>) {
     throw keyNotSpecifiedError;
   }
 
-  return Resource.find(EnvEntry, new Query<EnvEntry>().where('app').is(app).where('key').is(key));
+  return get(app + key);
 }
 
-
-export default { get, set, show, remove, apps, reload, list, [init]: reload };
+export default {
+  get: getVar,
+  set: setVar,
+  remove: removeVar,
+  show,
+  apps,
+  list,
+};
