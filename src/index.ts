@@ -1,9 +1,9 @@
-import { getStorage } from "@cloud-cli/cli";
+import { getStorage } from '@cloud-cli/cli';
 
-const appNotSpecifiedError = new Error("App not specified");
-const keyNotSpecifiedError = new Error("Key not specified");
+const appNotSpecifiedError = new Error('App not specified');
+const keyNotSpecifiedError = new Error('Key not specified');
 
-const { get, set, remove, getAll } = getStorage<EnvEntry>("env");
+const { get, set, remove, getAll } = getStorage<EnvEntry>('env');
 
 export class EnvEntry {
   app: string;
@@ -38,7 +38,7 @@ async function show(options: App) {
   return list({ app });
 }
 
-async function list(filters: ListFilters) {
+async function list(filters: ListFilters = {}) {
   let all = await getAll();
 
   if (filters.app) {
@@ -71,7 +71,7 @@ async function setVar(options: AppKeyValue) {
   }
 
   const entry = { app, key, value };
-  await set(app + key, entry);
+  await set(computeId(app, key), entry);
 
   return entry;
 }
@@ -82,14 +82,14 @@ async function removeVar(options: AppKeyValue) {
   const found = await getVar({ app, key });
 
   if (found) {
-    remove(app + key);
+    await remove(computeId(app, key));
     return true;
   }
 
   return false;
 }
 
-async function getVar(options: Omit<AppKeyValue, "value">) {
+async function getVar(options: Omit<AppKeyValue, 'value'>) {
   const app = options.app || options.name;
   const { key } = options;
 
@@ -101,7 +101,12 @@ async function getVar(options: Omit<AppKeyValue, "value">) {
     throw keyNotSpecifiedError;
   }
 
-  return get(app + key);
+  return get(computeId(app, key));
+}
+
+const invalidRe = /[^a-z09-]/g;
+function computeId(app, key) {
+  return `${app}.${key}`.replace(invalidRe, '-');
 }
 
 export default {

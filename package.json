@@ -11,12 +11,14 @@
     "tdd": "jest --watchAll",
     "build": "rm -rf ./dist/* && tsc --project ./tsconfig.json"
   },
-  "keywords": ["cloudy"],
+  "keywords": [
+    "cloudy"
+  ],
   "license": "MIT",
   "devDependencies": {
-    "@cloud-cli/jest-config": "^1.0.0",
     "@cloud-cli/prettier-config": "^1.0.0",
-    "@cloud-cli/typescript-config": "^1.0.1"
+    "@cloud-cli/typescript-config": "^1.0.1",
+    "vitest": "^1.6.0"
   },
   "repository": {
     "type": "git",
