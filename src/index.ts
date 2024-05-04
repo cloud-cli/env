@@ -5,7 +5,7 @@ const keyNotSpecifiedError = new Error('Key not specified');
 
 const { get, set, remove, getAll } = getStorage<EnvEntry>('env');
 
-export class EnvEntry {
+export interface EnvEntry {
   app: string;
   key: string;
   value: string;
