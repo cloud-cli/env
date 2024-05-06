@@ -10,57 +10,57 @@ describe('store KV pairs', () => {
   beforeEach(() => getStorage('env').reset());
 
   it('should throw errors if parameters are missing', async () => {
-    await expect(env.set({ app: '', key: '' })).rejects.toEqual(new Error('App not specified'));
-    await expect(env.set({ app: '', name: 'test', key: '' })).rejects.toEqual(new Error('Key not specified'));
-    await expect(env.set({ app: 'test', key: '' })).rejects.toEqual(new Error('Key not specified'));
+    expect(() => env.set({ app: '', key: '' })).toThrow(new Error('App not specified'));
+    expect(() => env.set({ app: '', name: 'test', key: '' })).toThrow(new Error('Key not specified'));
+    expect(() => env.set({ app: 'test', key: '' })).toThrow(new Error('Key not specified'));
 
-    await expect(env.get({ app: '', key: '' })).rejects.toEqual(new Error('App not specified'));
-    await expect(env.get({ app: 'test', key: '' })).rejects.toEqual(new Error('Key not specified'));
-    await expect(env.get({ name: 'test', key: '' })).rejects.toEqual(new Error('Key not specified'));
+    expect(() => env.get({ app: '', key: '' })).toThrow(new Error('App not specified'));
+    expect(() => env.get({ app: 'test', key: '' })).toThrow(new Error('Key not specified'));
+    expect(() => env.get({ name: 'test', key: '' })).toThrow(new Error('Key not specified'));
 
-    await expect(env.show({ app: '' })).rejects.toEqual(new Error('App not specified'));
+    expect(() => env.show({ app: '' })).toThrow(new Error('App not specified'));
 
-    await expect(env.remove({ app: '', key: '' })).rejects.toEqual(new Error('App not specified'));
-    await expect(env.remove({ app: 'test', key: '' })).rejects.toEqual(new Error('Key not specified'));
-    await expect(env.remove({ app: '', name: 'test', key: '' })).rejects.toEqual(new Error('Key not specified'));
+    expect(() => env.remove({ app: '', key: '' })).toThrow(new Error('App not specified'));
+    expect(() => env.remove({ app: 'test', key: '' })).toThrow(new Error('Key not specified'));
+    expect(() => env.remove({ app: '', name: 'test', key: '' })).toThrow(new Error('Key not specified'));
   });
 
   it('should return null if no value is stored', async () => {
-    await expect(env.get({ app: 'test', key: 'key' })).resolves.toEqual(null);
+    expect(env.get({ app: 'test', key: 'key' })).toEqual(null);
   });
 
   it('should store key/value pairs', async () => {
     // idempotent
-    await expect(env.set(envVariable)).resolves.toEqual(envVariable);
-    await expect(env.set(envVariable)).resolves.toEqual(envVariable);
-    await expect(env.get(appAndKey)).resolves.toEqual(envVariable);
+    expect(env.set(envVariable)).toEqual(envVariable);
+    expect(env.set(envVariable)).toEqual(envVariable);
+    expect(env.get(appAndKey)).toEqual(envVariable);
   });
 
   it('should list all values stored for an app', async () => {
-    await env.set(envVariable);
-    await expect(env.apps()).resolves.toEqual(['test']);
-    await expect(env.show(app)).resolves.toEqual([envVariable]);
-    await expect(env.show({ app: '', name: 'test' })).resolves.toEqual([envVariable]);
+    env.set(envVariable);
+    expect(env.apps()).toEqual(['test']);
+    expect(env.show(app)).toEqual([envVariable]);
+    expect(env.show({ app: '', name: 'test' })).toEqual([envVariable]);
   });
 
   it('should remove stored values for an app', async () => {
-    await env.set(envVariable);
-    await expect(env.remove(envVariable)).resolves.toBe(true);
-    await expect(env.remove(envVariable)).resolves.toBe(false);
-    await expect(env.show(app)).resolves.toEqual([]);
+    env.set(envVariable);
+    expect(env.remove(envVariable)).toBe(true);
+    expect(env.remove(envVariable)).toBe(false);
+    expect(env.show(app)).toEqual([]);
   });
 
   it('should list all entries', async () => {
     const one = { app: 'list', key: 'ONE', value: 'one' };
     const two = { app: 'list', key: 'TWO', value: 'two' };
 
-    await env.set(one);
-    await env.set(two);
-    await expect(env.list()).resolves.toEqual([one, two]);
-    await expect(env.list({ app: 'list' })).resolves.toEqual([one, two]);
-    await env.remove(one);
-    await env.remove(two);
+    env.set(one);
+    env.set(two);
+    expect(env.list()).toEqual([one, two]);
+    expect(env.list({ app: 'list' })).toEqual([one, two]);
+    env.remove(one);
+    env.remove(two);
 
-    await expect(env.list()).resolves.toEqual([]);
+    expect(env.list()).toEqual([]);
   });
 });

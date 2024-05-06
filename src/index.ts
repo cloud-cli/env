@@ -6,7 +6,7 @@ const keyNotSpecifiedError = new Error('Key not specified');
 const { get, set, remove, getAll } = getStorage<EnvEntry>('env');
 
 const readName = (options) => {
-  options.app = options.app || options.name || options._[0];
+  options.app = options.app || options.name || options._?.[0];
 };
 
 export interface EnvEntry {
@@ -32,7 +32,7 @@ export interface KeyValue {
 
 export interface AppKeyValue extends App, KeyValue {}
 
-async function show(options: App) {
+function show(options: App) {
   readName(options);
   const { app } = options;
 
