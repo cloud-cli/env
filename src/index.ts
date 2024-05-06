@@ -5,6 +5,10 @@ const keyNotSpecifiedError = new Error('Key not specified');
 
 const { get, set, remove, getAll } = getStorage<EnvEntry>('env');
 
+const readName = (options) => {
+  options.app = options.app || options.name || options._[0];
+};
+
 export interface EnvEntry {
   app: string;
   key: string;
@@ -29,7 +33,8 @@ export interface KeyValue {
 export interface AppKeyValue extends App, KeyValue {}
 
 async function show(options: App) {
-  const app = options.app || options.name;
+  readName(options);
+  const { app } = options;
 
   if (!app) {
     throw appNotSpecifiedError;
@@ -38,8 +43,8 @@ async function show(options: App) {
   return list({ app });
 }
 
-async function list(filters: ListFilters = {}) {
-  let all = await getAll();
+function list(filters: ListFilters = {}) {
+  let all = getAll();
 
   if (filters.app) {
     all = all.filter((e) => e.app === filters.app);
@@ -52,15 +57,16 @@ async function list(filters: ListFilters = {}) {
   return all;
 }
 
-async function apps() {
-  const rows = await getAll();
+function apps() {
+  const rows = getAll();
   const apps = rows.map((entry) => entry.app);
+
   return [...new Set(apps)];
 }
 
-async function setVar(options: AppKeyValue) {
-  const app = options.app || options.name;
-  const { key, value } = options;
+function setVar(options: AppKeyValue) {
+  readName(options);
+  const { key, value, app } = options;
 
   if (!app) {
     throw appNotSpecifiedError;
@@ -71,27 +77,27 @@ async function setVar(options: AppKeyValue) {
   }
 
   const entry = { app, key, value };
-  await set(computeId(app, key), entry);
+  set(computeId(app, key), entry);
 
   return entry;
 }
 
-async function removeVar(options: AppKeyValue) {
-  const app = options.app || options.name;
-  const { key } = options;
-  const found = await getVar({ app, key });
+function removeVar(options: AppKeyValue) {
+  readName(options);
+  const { app, key } = options;
+  const found = getVar({ app, key });
 
   if (found) {
-    await remove(computeId(app, key));
+    remove(computeId(app, key));
     return true;
   }
 
   return false;
 }
 
-async function getVar(options: Omit<AppKeyValue, 'value'>) {
-  const app = options.app || options.name;
-  const { key } = options;
+function getVar(options: Omit<AppKeyValue, 'value'>) {
+  readName(options);
+  const { app, key } = options;
 
   if (!app) {
     throw appNotSpecifiedError;
@@ -105,6 +111,7 @@ async function getVar(options: Omit<AppKeyValue, 'value'>) {
 }
 
 const invalidRe = /[^a-z09-]/gi;
+
 function computeId(app, key) {
   return `${app}.${key}`.replace(invalidRe, '-');
 }
