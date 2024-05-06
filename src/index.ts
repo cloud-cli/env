@@ -104,7 +104,7 @@ async function getVar(options: Omit<AppKeyValue, 'value'>) {
   return get(computeId(app, key));
 }
 
-const invalidRe = /[^a-z09-]/g;
+const invalidRe = /[^a-z09-]/gi;
 function computeId(app, key) {
   return `${app}.${key}`.replace(invalidRe, '-');
 }
