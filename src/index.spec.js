@@ -34,6 +34,7 @@ describe('store KV pairs', () => {
     expect(env.set(envVariable)).toEqual(envVariable);
     expect(env.set(envVariable)).toEqual(envVariable);
     expect(env.get(appAndKey)).toEqual(envVariable);
+    expect(env.list()).toEqual([envVariable])
   });
 
   it('should list all values stored for an app', async () => {
