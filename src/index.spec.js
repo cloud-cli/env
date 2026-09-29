@@ -1,10 +1,33 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import env from './index';
-import { getStorage } from '@cloud-cli/cli';
+import { getStorage, help } from '@cloud-cli/cli';
 
 const app = { app: 'test' };
 const appAndKey = { app: 'test', key: 'KEY' };
 const envVariable = { app: 'test', key: 'KEY', value: 'ok' };
+
+describe('help', () => {
+  it('should have a [help] Symbol export that is a function', () => {
+    expect(env[help]).toBeDefined();
+    expect(typeof env[help]).toBe('function');
+  });
+
+  it('should return a string help text', () => {
+    const helpText = env[help]();
+    expect(typeof helpText).toBe('string');
+    expect(helpText).toContain('environment');
+    expect(helpText).toContain('get [name]');
+    expect(helpText).toContain('set [name]');
+    expect(helpText).toContain('remove [name]');
+    expect(helpText).toContain('show [name]');
+    expect(helpText).toContain('list');
+    expect(helpText).toContain('apps');
+  });
+
+  it('should not expose "help" as a normal command key', () => {
+    expect(env.help).toBeUndefined();
+  });
+});
 
 describe('store KV pairs', () => {
   beforeEach(() => getStorage('env').reset());
@@ -34,7 +57,7 @@ describe('store KV pairs', () => {
     expect(env.set(envVariable)).toEqual(envVariable);
     expect(env.set(envVariable)).toEqual(envVariable);
     expect(env.get(appAndKey)).toEqual(envVariable);
-    expect(env.list()).toEqual([envVariable])
+    expect(env.list()).toEqual([envVariable]);
   });
 
   it('should list all values stored for an app', async () => {

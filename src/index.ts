@@ -1,4 +1,4 @@
-import { getStorage } from '@cloud-cli/cli';
+import { getStorage, help } from '@cloud-cli/cli';
 
 const appNotSpecifiedError = new Error('App not specified');
 const keyNotSpecifiedError = new Error('Key not specified');
@@ -121,21 +121,19 @@ export default {
   show,
   apps,
   list,
-  help: () => ({
-    description: 'Manage environment variables',
-    commands: {
-      'env get [name]': "Get a value for an app's environment variable",
-      'env set [name] --app <app> --key <key> --value <value>': 'Set an env var for an app',
-      'env remove [name] --app <app> --key <key>': 'Remove an env var for an app',
-      'env show [name]': 'Show all env vars for an app',
-      'env list': 'List all apps with their env vars',
-      'env apps': 'List all defined apps',
-    },
-    options: {
-      name: 'App name',
-      app: 'Application name',
-      key: 'Environment variable key',
-      value: 'Environment variable value',
-    },
-  }),
+  [help]: () => `Manage environment variables
+
+Available commands:
+  get [name] - Get a value for an app's environment variable
+  set [name] --app <app> --key <key> --value <value> - Set an env var for an app
+  remove [name] --app <app> --key <key> - Remove an env var for an app
+  show [name] - Show all env vars for an app
+  list - List all apps with their env vars
+  apps - List all defined apps
+
+Options:
+  name - App name
+  app - Application name
+  key - Environment variable key
+  value - Environment variable value`,
 };
