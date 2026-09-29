@@ -121,4 +121,21 @@ export default {
   show,
   apps,
   list,
+  help: () => ({
+    description: 'Manage environment variables',
+    commands: {
+      'env get [name]': "Get a value for an app's environment variable",
+      'env set [name] --app <app> --key <key> --value <value>': 'Set an env var for an app',
+      'env remove [name] --app <app> --key <key>': 'Remove an env var for an app',
+      'env show [name]': 'Show all env vars for an app',
+      'env list': 'List all apps with their env vars',
+      'env apps': 'List all defined apps',
+    },
+    options: {
+      name: 'App name',
+      app: 'Application name',
+      key: 'Environment variable key',
+      value: 'Environment variable value',
+    },
+  }),
 };
