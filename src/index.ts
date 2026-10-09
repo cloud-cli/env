@@ -1,9 +1,9 @@
-import { getStorage, help } from '@cloud-cli/cli';
+import { getStorage, help } from "@cloud-cli/cli";
 
-const appNotSpecifiedError = new Error('App not specified');
-const keyNotSpecifiedError = new Error('Key not specified');
+const appNotSpecifiedError = new Error("App not specified");
+const keyNotSpecifiedError = new Error("Key not specified");
 
-const { get, set, remove, getAll } = getStorage<EnvEntry>('env');
+const { get, set, remove, getAll } = getStorage<EnvEntry>("env");
 
 const readName = (options) => {
   options.app = options.app || options.name || options._?.[0];
@@ -95,7 +95,7 @@ function removeVar(options: AppKeyValue) {
   return false;
 }
 
-function getVar(options: Omit<AppKeyValue, 'value'>) {
+function getVar(options: Omit<AppKeyValue, "value">) {
   readName(options);
   const { app, key } = options;
 
@@ -124,12 +124,12 @@ export default {
   [help]: () => `Manage environment variables
 
 Available commands:
-  get [name] - Get a value for an app's environment variable
-  set [name] --app <app> --key <key> --value <value> - Set an env var for an app
-  remove [name] --app <app> --key <key> - Remove an env var for an app
-  show [name] - Show all env vars for an app
-  list - List all apps with their env vars
-  apps - List all defined apps
+  env.get --app <app> --key <key> - Get an app environment variable
+  env.set --app <app> --key <key> --value <value> - Set an environment variable
+  env.remove --app <app> --key <key> - Remove an environment variable
+  env.show --app <app> - Show all environment variables for an app
+  env.list [--app <app>] [--key <key>] - List matching environment variables
+  env.apps - List all defined apps
 
 Options:
   name - App name

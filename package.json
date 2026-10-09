@@ -29,6 +29,6 @@
     "access": "public"
   },
   "peerDependencies": {
-    "@cloud-cli/cli": "^2.0.0"
+    "@cloud-cli/cli": "^2.2.0"
   }
 }
